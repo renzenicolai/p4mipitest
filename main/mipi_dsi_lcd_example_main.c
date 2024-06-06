@@ -25,31 +25,32 @@ static const char *TAG = "example";
 //////////////////// Please update the following configuration according to your LCD Spec //////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// FPS = 80000000/(40+140+40+480)/(4+16+16+800) = 60Hz
-#define EXAMPLE_MIPI_DSI_DPI_CLK_MHZ  20
+#if 1
+//JD040WVBAV013
+#define EXAMPLE_MIPI_DSI_DPI_CLK_MHZ  30
 #define EXAMPLE_MIPI_DSI_LCD_H_RES    480
 #define EXAMPLE_MIPI_DSI_LCD_V_RES    800
-#define EXAMPLE_MIPI_DSI_LCD_HSYNC    1
+#define EXAMPLE_MIPI_DSI_LCD_HSYNC    40
 #define EXAMPLE_MIPI_DSI_LCD_HBP      40
-#define EXAMPLE_MIPI_DSI_LCD_HFP      20
-#define EXAMPLE_MIPI_DSI_LCD_VSYNC    1
+#define EXAMPLE_MIPI_DSI_LCD_HFP      30
+#define EXAMPLE_MIPI_DSI_LCD_VSYNC    16
 #define EXAMPLE_MIPI_DSI_LCD_VBP      16
-#define EXAMPLE_MIPI_DSI_LCD_VFP      2
-
-/*
-#define EXAMPLE_MIPI_DSI_DPI_CLK_MHZ  18
-#define EXAMPLE_MIPI_DSI_LCD_H_RES    800
-#define EXAMPLE_MIPI_DSI_LCD_V_RES    480
-#define EXAMPLE_MIPI_DSI_LCD_HSYNC    1
+#define EXAMPLE_MIPI_DSI_LCD_VFP      16
+#else
+//PL299L800M
+#define EXAMPLE_MIPI_DSI_DPI_CLK_MHZ  30
+#define EXAMPLE_MIPI_DSI_LCD_H_RES    268
+#define EXAMPLE_MIPI_DSI_LCD_V_RES    800
+#define EXAMPLE_MIPI_DSI_LCD_HSYNC    240
 #define EXAMPLE_MIPI_DSI_LCD_HBP      40
-#define EXAMPLE_MIPI_DSI_LCD_HFP      20
-#define EXAMPLE_MIPI_DSI_LCD_VSYNC    1
-#define EXAMPLE_MIPI_DSI_LCD_VBP      8
-#define EXAMPLE_MIPI_DSI_LCD_VFP      4
-*/
+#define EXAMPLE_MIPI_DSI_LCD_HFP      30
+#define EXAMPLE_MIPI_DSI_LCD_VSYNC    33
+#define EXAMPLE_MIPI_DSI_LCD_VBP      16
+#define EXAMPLE_MIPI_DSI_LCD_VFP      16
+#endif
 
-#define EXAMPLE_MIPI_DSI_LANE_NUM          2    // 2 data lanes
-#define EXAMPLE_MIPI_DSI_LANE_BITRATE_MBPS 500 // 1Gbps
+#define EXAMPLE_MIPI_DSI_LANE_NUM          2
+#define EXAMPLE_MIPI_DSI_LANE_BITRATE_MBPS 250
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// Please update the following configuration according to your Board Design //////////////////////////
@@ -60,8 +61,8 @@ static const char *TAG = "example";
 #define EXAMPLE_MIPI_DSI_PHY_PWR_LDO_VOLTAGE_MV 2500
 #define EXAMPLE_LCD_BK_LIGHT_ON_LEVEL           1
 #define EXAMPLE_LCD_BK_LIGHT_OFF_LEVEL          !EXAMPLE_LCD_BK_LIGHT_ON_LEVEL
-#define EXAMPLE_PIN_NUM_BK_LIGHT                22
-#define EXAMPLE_PIN_NUM_LCD_RST                 -1
+#define EXAMPLE_PIN_NUM_BK_LIGHT                -1
+#define EXAMPLE_PIN_NUM_LCD_RST                 0
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// Please update the following configuration according to your Application ///////////////////////////
@@ -251,6 +252,7 @@ void app_main(void)
     // initialize LVGL draw buffers
     lv_display_set_buffers(display, buf1, buf2, draw_buffer_sz, LV_DISPLAY_RENDER_MODE_PARTIAL);
     // set color depth
+
     lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
     // set the callback which can copy the rendered image to an area of the display
     lv_display_set_flush_cb(display, example_lvgl_flush_cb);
