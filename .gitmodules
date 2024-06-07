@@ -1,0 +1,3 @@
+[submodule "components/pax-graphics"]
+	path = components/pax-graphics
+	url = https://github.com/robotman2412/pax-graphics.git

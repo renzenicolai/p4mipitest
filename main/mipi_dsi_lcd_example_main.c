@@ -18,8 +18,18 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "lvgl.h"
+#include "pax_gfx.h"
+#include "fonts/chakrapetchmedium.h"
 
 static const char *TAG = "example";
+pax_buf_t fb;
+
+// Colors
+pax_col_t color_background = 0xFFEEEAEE;
+pax_col_t color_primary    = 0xFF01BC99;
+pax_col_t color_secondary  = 0xFFFFCF53;
+pax_col_t color_tertiary   = 0xFFFF017F;
+pax_col_t color_quaternary = 0xFF340132;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// Please update the following configuration according to your LCD Spec //////////////////////////////
@@ -234,7 +244,85 @@ void app_main(void)
     // turn on backlight
     example_bsp_set_lcd_backlight(EXAMPLE_LCD_BK_LIGHT_ON_LEVEL);
 
-    ESP_LOGI(TAG, "Initialize LVGL library");
+    pax_buf_init(&fb, NULL, EXAMPLE_MIPI_DSI_LCD_H_RES, EXAMPLE_MIPI_DSI_LCD_V_RES, PAX_BUF_16_565RGB);
+    pax_buf_reversed(&fb, false);
+    pax_buf_set_orientation(&fb, PAX_O_ROT_CW);
+
+        // Fill the buffer with the background color
+    pax_background(&fb, color_background);
+
+    //pax_draw_image(&fb, &assets[ASSET_TEMPLATE], 0, 0);
+
+    // Footer test
+    int footer_height      = 32;
+    int footer_vmarign     = 7;
+    int footer_hmarign     = 20;
+    int footer_text_height = 16;
+    int footer_text_hmarign = 20;
+    pax_font_t* footer_text_font = &chakrapetchmedium;
+
+    int footer_box_height = footer_height + (footer_vmarign * 2);
+    pax_draw_line(&fb, color_quaternary, footer_hmarign, pax_buf_get_height(&fb) - footer_box_height, pax_buf_get_width(&fb) - footer_hmarign, pax_buf_get_height(&fb) - footer_box_height);
+    pax_right_text(&fb, color_quaternary, footer_text_font, footer_text_height, pax_buf_get_width(&fb) - footer_hmarign - footer_text_hmarign, pax_buf_get_height(&fb) - footer_box_height + (footer_box_height - footer_text_height) / 2, "↑ / ↓ / ← / → Navigate   🅰 Start");
+
+
+    // Font test
+    /*pax_draw_text(&fb, color_quaternary, pax_font_sky, footer_text_height, footer_hmarign + footer_text_hmarign,  (footer_vmarign + footer_text_height) * 1, "Test test test 🅰🅱🅷🅼🆂🅴↑↓←→⤓");
+    pax_draw_text(&fb, color_quaternary, pax_font_sky_mono, footer_text_height, footer_hmarign + footer_text_hmarign,  (footer_vmarign + footer_text_height) * 2, "Test test test 🅰🅱🅷🅼🆂🅴↑↓←→⤓");
+    pax_draw_text(&fb, color_quaternary, pax_font_marker, footer_text_height, footer_hmarign + footer_text_hmarign,  (footer_vmarign + footer_text_height) * 3, "Test test test 🅰🅱🅷🅼🆂🅴↑↓←→⤓");
+    pax_draw_text(&fb, color_quaternary, pax_font_saira_condensed, footer_text_height, footer_hmarign + footer_text_hmarign,  (footer_vmarign + footer_text_height) * 4, "Test test test 🅰🅱🅷🅼🆂🅴↑↓←→⤓");
+    pax_draw_text(&fb, color_quaternary, pax_font_saira_regular, footer_text_height, footer_hmarign + footer_text_hmarign,  (footer_vmarign + footer_text_height) * 5, "Test test test 🅰🅱🅷🅼🆂🅴↑↓←→⤓");
+    pax_draw_text(&fb, color_quaternary, &chakrapetchmedium, footer_text_height, footer_hmarign + footer_text_hmarign,  (footer_vmarign + footer_text_height) * 6, "Test test test 🅰🅱🅷🅼🆂🅴↑↓←→⤓");*/
+
+    int circle_count = 6;
+    int circle_spacing = 68;
+    int circle_offset = (pax_buf_get_width(&fb) - circle_spacing * (circle_count - 1)) / 2;
+
+    for (int i = 0; i < circle_count; i++) {
+        pax_draw_circle(&fb, 0xFFFFFFFF, circle_offset + circle_spacing * i, 375, 28);
+        pax_outline_circle(&fb, 0xFFE4E4E4, circle_offset + circle_spacing * i, 375, 28);
+    }
+
+    int square_count = 5;
+    int square_voffset = 116;
+    int square_hoffset = 62;
+    int square_size = 170;
+    int square_selected = 0;
+    int square_spacing = 1;
+    int square_marign = 2;
+
+    pax_col_t square_colors[] = {
+        0xFFFFFFFF,
+        color_secondary,
+        color_tertiary,
+        color_quaternary,
+        color_primary,
+    };
+
+    for (int i = 0; i < square_count; i++) {
+        if (i == square_selected) {
+            pax_draw_rect(&fb, color_primary, square_hoffset + (square_size + square_spacing) * i, square_voffset, square_size, square_size);
+        }
+        pax_draw_rect(&fb, square_colors[i], square_hoffset + (square_size + square_spacing) * i + square_marign, square_voffset + square_marign, square_size - square_marign * 2, square_size - square_marign * 2);
+    }
+
+    int title_text_voffset = square_voffset - 32;
+    int title_text_hoffset = square_hoffset - 2;
+    int title_text_height = 20;
+    pax_font_t* title_text_font = &chakrapetchmedium;
+
+    pax_draw_text(&fb, color_primary, title_text_font, title_text_height, title_text_hoffset, title_text_voffset, "Example Application Title");
+
+    pax_right_text(&fb, color_quaternary, title_text_font, 20, pax_buf_get_width(&fb) - 40, 32, "23:37 :D");
+
+    esp_lcd_panel_draw_bitmap(mipi_dpi_panel, 0, 0, EXAMPLE_MIPI_DSI_LCD_H_RES, EXAMPLE_MIPI_DSI_LCD_V_RES, fb.buf);
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
+
+    /*ESP_LOGI(TAG, "Initialize LVGL library");
     lv_init();
     // create a lvgl display
     lv_display_t *display = lv_display_create(EXAMPLE_MIPI_DSI_LCD_H_RES, EXAMPLE_MIPI_DSI_LCD_V_RES);
@@ -288,5 +376,5 @@ void app_main(void)
         example_lvgl_demo_ui(display);
         // Release the mutex
         example_lvgl_unlock();
-    }
+    }*/
 }
