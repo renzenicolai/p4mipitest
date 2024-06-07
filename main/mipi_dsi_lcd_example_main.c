@@ -189,8 +189,8 @@ void app_main(void)
     // we use DBI interface to send LCD commands and parameters
     esp_lcd_dbi_io_config_t dbi_config = {
         .virtual_channel = 0,
-        .lcd_cmd_bits = 8,   // according to the LCD ILI9881C spec
-        .lcd_param_bits = 8, // according to the LCD ILI9881C spec
+        .lcd_cmd_bits = 8,
+        .lcd_param_bits = 8,
     };
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_dbi(mipi_dsi_bus, &dbi_config, &mipi_dbi_io));
     // create ILI9881C control panel
@@ -199,6 +199,9 @@ void app_main(void)
         .bits_per_pixel = 24,
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
         .reset_gpio_num = EXAMPLE_PIN_NUM_LCD_RST,
+        .flags = {
+            .reset_active_high = false,
+        },
     };
     ESP_ERROR_CHECK(esp_lcd_new_panel_st7701(mipi_dbi_io, &lcd_dev_config, &st7701_ctrl_panel));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(st7701_ctrl_panel));

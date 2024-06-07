@@ -182,16 +182,6 @@ esp_err_t esp_lcd_new_panel_st7701(const esp_lcd_panel_io_handle_t io, const esp
         break;
     }
 
-    // Select BK0
-    uint8_t id[3];
-    esp_lcd_panel_io_tx_param(io, 0xFF, (uint8_t[]) {
-        0x77, 0x01, 0x00, 0x00, 0x10
-    }, 5);
-
-    // Read ID
-    esp_lcd_panel_io_rx_param(io, 0x04, id, 3);
-    ESP_LOGI(TAG, "ID1: 0x%x, ID2: 0x%x, ID3: 0x%x", id[0], id[1], id[2]);
-
     st7701->io = io;
     st7701->reset_gpio_num = panel_dev_config->reset_gpio_num;
     st7701->reset_level = panel_dev_config->flags.reset_active_high;
@@ -215,6 +205,22 @@ err:
     return ret;
 }
 
+static esp_err_t panel_st7701_read_id(esp_lcd_panel_t *panel) {
+    st7701_panel_t *st7701 = __containerof(panel, st7701_panel_t, base);
+    esp_lcd_panel_io_handle_t io = st7701->io;
+
+    // Select BK0
+    uint8_t id[3];
+    esp_lcd_panel_io_tx_param(io, 0xFF, (uint8_t[]) {
+        0x77, 0x01, 0x00, 0x00, 0x10
+    }, 5);
+
+    // Read ID
+    esp_lcd_panel_io_rx_param(io, 0x04, id, 3);
+    ESP_LOGI(TAG, "ID1: 0x%x, ID2: 0x%x, ID3: 0x%x", id[0], id[1], id[2]);
+    return ESP_OK;
+}
+
 static esp_err_t panel_st7701_del(esp_lcd_panel_t *panel)
 {
     st7701_panel_t *st7701 = __containerof(panel, st7701_panel_t, base);
@@ -228,10 +234,8 @@ static esp_err_t panel_st7701_del(esp_lcd_panel_t *panel)
 
 static esp_err_t panel_st7701_reset(esp_lcd_panel_t *panel)
 {
-    printf("Panel reset stub\n");
-    /*st7701_panel_t *st7701 = __containerof(panel, st7701_panel_t, base);
+    st7701_panel_t *st7701 = __containerof(panel, st7701_panel_t, base);
     esp_lcd_panel_io_handle_t io = st7701->io;
-
     // perform hardware reset
     if (st7701->reset_gpio_num >= 0) {
         gpio_set_level(st7701->reset_gpio_num, st7701->reset_level);
@@ -239,10 +243,10 @@ static esp_err_t panel_st7701_reset(esp_lcd_panel_t *panel)
         gpio_set_level(st7701->reset_gpio_num, !st7701->reset_level);
         vTaskDelay(pdMS_TO_TICKS(10));
     } else { // perform software reset
-        ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, LCD_CMD_SWRESET, NULL, 0), TAG, "send command failed");
+        // Not supported yet
+        //ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, LCD_CMD_SWRESET, NULL, 0), TAG, "send command failed");
         vTaskDelay(pdMS_TO_TICKS(20)); // spec, wait at least 5ms before sending new command
     }
-*/
     return ESP_OK;
 }
 
